@@ -8,11 +8,8 @@ import { verifyUserAuthorization } from "../middlewares/verify-user-authorizatio
 const deliveriesRoutes = Router()
 const deliveriesController = new DeliveriesController()
 
-deliveriesRoutes.use(ensureAuthenticated)
-deliveriesRoutes.post(
-  "/",
-  verifyUserAuthorization(["seller"]),
-  deliveriesController.create,
-)
+deliveriesRoutes.use(ensureAuthenticated, verifyUserAuthorization(["seller"]))
+deliveriesRoutes.post("/", deliveriesController.create)
+deliveriesRoutes.get("/", deliveriesController.index)
 
 export { deliveriesRoutes }

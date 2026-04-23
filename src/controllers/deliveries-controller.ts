@@ -28,6 +28,21 @@ export class DeliveriesController {
       },
     })
 
-    return response.json({ message: "Ok" })
+    return response.status(201).json({ message: "Ok" })
+  }
+
+  async index(request: Request, response: Response) {
+    const deliveries = await prisma.delivery.findMany({
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    })
+
+    return response.json(deliveries)
   }
 }
