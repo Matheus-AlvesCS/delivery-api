@@ -14,23 +14,23 @@ export class DeliveryLogsController {
 
     const { delivery_id, description } = bodySchema.parse(request.body)
 
-    const existingDelivery = await prisma.delivery.findUnique({
+    const delivery = await prisma.delivery.findUnique({
       where: {
         id: delivery_id,
       },
     })
 
-    if (!existingDelivery) {
+    if (!delivery) {
       throw new AppError("Delivery not found", 404)
     }
 
-    if (existingDelivery.status === "processing") {
+    if (delivery.status === "processing") {
       throw new AppError(
         "Unable to add logs for deliveries with processing status",
       )
     }
 
-    if (existingDelivery.status === "delivered") {
+    if (delivery.status === "delivered") {
       throw new AppError("Unable to add logs for deliveries already delivered")
     }
 
@@ -42,5 +42,46 @@ export class DeliveryLogsController {
     })
 
     return response.json()
+  }
+
+  async show(request: Request, response: Response) {
+    const paramsSchema = z.object({
+      delivery_id: z.uuid(),
+    })
+
+    const { delivery_id } = paramsSchema.parse(request.params)
+
+    const delivery = await prisma.delivery.findUnique({
+      where: {
+        id: delivery_id,
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        logs: {
+          omit: {
+            delivery_id: true,
+            updated_at: true,
+          },
+        },
+      },
+    })
+
+    if (!delivery) {
+      throw new AppError("Delivery not found", 404)
+    }
+
+    if (
+      request.user?.role === "customer" &&
+      request.user.id !== delivery.user_id
+    ) {
+      throw new AppError("Not authorized to view this delivery", 401)
+    }
+
+    return response.json(delivery)
   }
 }
