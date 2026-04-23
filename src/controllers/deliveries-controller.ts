@@ -28,7 +28,7 @@ export class DeliveriesController {
       },
     })
 
-    return response.status(201).json({ message: "Ok" })
+    return response.status(201).json()
   }
 
   async index(request: Request, response: Response) {
