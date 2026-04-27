@@ -6,6 +6,7 @@ export default defineConfig({
   clean: true,
   splitting: false,
   replaceNodeEnv: false,
+  external: ["supertest"],
   outExtension() {
     return { js: ".js" }
   },
